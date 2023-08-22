@@ -250,7 +250,6 @@ class ControlComms:
             return None
 
         # Parse response
-        print(f"CTRL TEST: {msg}")
         try:
             msg = msg.decode('utf-8')
             data = json.loads(msg)

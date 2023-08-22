@@ -70,7 +70,7 @@ L6474_init_t stepper_config = {
   10000,                             // Deceleration rate in pps^2. Range: (0..+inf)
   5000,                             // Maximum speed in pps. Range: (30..10000]
   1000,                              // Minimum speed in pps. Range: [30..10000)
-  300,                              // Torque regulation current in mA. Range: 31.25mA to 4000mA
+  1300,                              // Torque regulation current in mA. Range: 31.25mA to 4000mA
   L6474_OCD_TH_750mA,               // Overcurrent threshold (OCD_TH register)
   L6474_CONFIG_OC_SD_ENABLE,        // Overcurrent shutwdown (OC_SD field of CONFIG register)
   L6474_CONFIG_EN_TQREG_TVAL_USED,  // Torque regulation method (EN_TQREG field of CONFIG register)
@@ -160,8 +160,6 @@ float get_stepper_angle() {
   pos = stepper->get_position();
 
   // Convert to degrees
-  pos = pos % (STP_STEPS_PER_ROTATION * div_per_step);
-  pos = pos >= 0 ? pos : pos + (STP_STEPS_PER_ROTATION * div_per_step);
   deg = (float)pos * (360.0 / (STP_STEPS_PER_ROTATION * div_per_step));
 
   return deg;

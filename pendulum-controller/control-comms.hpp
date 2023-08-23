@@ -181,6 +181,10 @@ class ControlComms {
         return RX_EMPTY;
       }
 
+      // Test: echo back received message
+      // String msg = stream->readStringUntil('\n');
+      // stream->println(msg);
+
       // Attempt to parse JSON
       err = deserializeJson(doc, *stream);
       if (err.code() == DeserializationError::Ok) {

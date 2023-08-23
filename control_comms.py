@@ -6,9 +6,10 @@ Author:
 
 Date:
     Created on: 2023-08-05
+    Modified on: 2023-08-22
 
 Version:
-    0.1
+    0.2
 
 This interface provides one main function, step(), and other supporting
 functions to initialize a serial connection with the counterpart interface
@@ -257,14 +258,22 @@ class ControlComms:
             if self.debug_level >= DebugLevel.DEBUG_ERROR:
                 print(f"Error parsing message. Message received: {msg}")
             return None
+        
+        # Construct return data
+        try:
+            ret = (
+                data[RX_KEY_STATUS], 
+                data[RX_KEY_TIMESTAMP], 
+                data[RX_KEY_TERMINATED],
+                data[RX_KEY_OBSERVATION]
+            )
+        except KeyError as e:
+            if self.debug_level >= DebugLevel.DEBUG_ERROR:
+                print(f"Reply message did not contain correct JSON keys")
+            return None
 
         # Return tuple with results
-        return (
-            data[RX_KEY_STATUS], 
-            data[RX_KEY_TIMESTAMP], 
-            data[RX_KEY_TERMINATED],
-            data[RX_KEY_OBSERVATION]
-        )
+        return ret
 
 if __name__ == "__main__":
 

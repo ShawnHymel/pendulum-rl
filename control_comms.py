@@ -57,6 +57,7 @@ import json
 from enum import Enum
 from functools import total_ordering
 from typing import List, Tuple, Union
+import time
 
 import serial
 import serial.tools.list_ports
@@ -119,7 +120,7 @@ class ControlComms:
 
     def __init__(
         self, 
-        timeout: float = 1.0, 
+        timeout: float = 1.0,
         debug_level: DebugLevel = DebugLevel.DEBUG_NONE
     ) -> None:
         """
@@ -129,9 +130,13 @@ class ControlComms:
             timeout_ms (int): Number of milliseconds to wait for a response
             debug_level (int): How much debugging info to print to the screen
         """
-        self.ser = serial.Serial()
+        self.ser = serial.Serial(dsrdtr=False)
+        self.ser.rts = False
+        self.ser.dtr = False
         self.set_timeout(timeout)
         self.debug_level = debug_level
+        
+        # Disable DTR/RTS to prevent ESP32 from 
 
     def __del__(self) -> None:
         """
@@ -149,7 +154,8 @@ class ControlComms:
         Args:
             timeout_ms (int): Number of milliseconds to wait for a response
         """
-        self.ser.timeout = timeout
+        self.ser.timeout = 0
+        self.timeout = timeout
 
     def get_serial_list(self) -> Tuple[Tuple[str, str, str], ...]:
         """
@@ -242,23 +248,48 @@ class ControlComms:
                 print(f"Error sending message: {e}")
             return None
 
-        # Wait for a response
-        try:
-            msg = self.ser.read_until('\n'.encode('utf-8'))
-        except Exception as e:
-            if self.debug_level >= DebugLevel.DEBUG_ERROR:
-                print(f"Error receiving message: {e}")
-            return None
+        print(f"Sent: {msg}")
 
-        # Parse response
-        try:
-            msg = msg.decode('utf-8')
-            data = json.loads(msg)
-        except ValueError as e:
-            if self.debug_level >= DebugLevel.DEBUG_ERROR:
-                print(f"Error parsing message. Message received: {msg}")
-            return None
-        
+        # TEST
+        waiting = True
+        while waiting:
+
+            # Wait for a response
+            msg = ""
+            try:
+                
+                # Test my own implementation
+                timestamp = time.time()
+                # stuff = iter('{"status":1,"timestamp":1551585,"terminated":false,"observation":[0.00,0.00]}\n')
+                while time.time() - timestamp < self.timeout:
+                    print(f"{self.ser.in_waiting} ", end='')
+                    c = self.ser.read(1).decode('ascii')
+                    print(c, end='')
+                    if c == '\n':
+                        break
+                    msg += c
+                    
+                # msg = self.ser.read_until('\n'.encode('utf-8'))
+                
+            except Exception as e:
+                if self.debug_level >= DebugLevel.DEBUG_ERROR:
+                    print(f"Error receiving message: {e}")
+                return None
+
+            # Parse response
+            try:
+                # msg = msg.decode('utf-8')
+                data = json.loads(msg)
+            except ValueError as e:
+                if self.debug_level >= DebugLevel.DEBUG_ERROR:
+                    print(f"Error parsing message. Message received: {msg}")
+                self.ser.flushInput()
+                return None
+
+            # TEST
+            if type(data) is not int:
+                waiting = False
+
         # Construct return data
         try:
             ret = (
@@ -267,7 +298,7 @@ class ControlComms:
                 data[RX_KEY_TERMINATED],
                 data[RX_KEY_OBSERVATION]
             )
-        except KeyError as e:
+        except (TypeError, KeyError) as e:
             if self.debug_level >= DebugLevel.DEBUG_ERROR:
                 print(f"Reply message did not contain correct JSON keys")
             return None

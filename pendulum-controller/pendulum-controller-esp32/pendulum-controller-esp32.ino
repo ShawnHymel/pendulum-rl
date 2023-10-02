@@ -76,13 +76,6 @@ ControlComms ctrl;
  * Interrupt service routines (ISRs)
  */
 
-// Stepper timer ISR
-void IRAM_ATTR onStepperTimer() {
-  if (stepper.distanceToGo() != 0) {
-    stepper.run();
-  }
-}
-
 // Encoder interrupt service routine (pin change): check state
 void encoderISR() {
   encoder->tick();
@@ -194,12 +187,6 @@ void setup() {
   // Stepper settings
   stepper.setMaxSpeed(STP_MAX_SPEED);
   stepper.setAcceleration(STP_ACCELERATION);
-
-  // Configure timer interrupt
-  stp_timer = timerBegin(0, 80, true);
-  timerAttachInterrupt(stp_timer, &onStepperTimer, true);
-  timerAlarmWrite(stp_timer, STP_TICK_PERIOD, true);
-  timerAlarmEnable(stp_timer);
 }
 
 void loop() {
@@ -210,6 +197,9 @@ void loop() {
   float observation[NUM_OBS];
   ControlComms::StatusCode rx_code;
   static bool blocking = false;
+
+  // Handle stepper
+  stepper.run();
 
   // Receive
   rx_code = ctrl.receive_action<NUM_ACTIONS>(&command, action);

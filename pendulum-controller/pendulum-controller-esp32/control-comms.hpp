@@ -139,12 +139,16 @@ class ControlComms {
       uint8_t digits = 2
     ) {
       
+      // Flush a lot to prevent the 64-byte Tx buffer from filling up
       stream->print(F("{\"status\":"));
       stream->print(status);
+      stream->flush();
       stream->print(F(",\"timestamp\":"));
       stream->print(timestamp);
+      stream->flush();
       stream->print(F(",\"terminated\":"));
       stream->print(terminated ? F("true") : F("false"));
+      stream->flush();
       stream->print(F(",\"observation\":["));
       for (unsigned int i = 0; i < num_obs; i++) {
         stream->print(observation[i], digits);
@@ -154,6 +158,7 @@ class ControlComms {
       }
       stream->print(F("]}"));
       stream->println();
+      stream->flush();
     }
 
     /**

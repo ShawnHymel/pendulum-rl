@@ -62,6 +62,7 @@ const uint16_t STP_DIVS_PER_STEP = 8;
 const uint16_t STP_STEPS_PER_ROTATION = 200;
 const uint8_t STP_DRIVER_TYPE = 1;
 const uint32_t STP_TICK_PERIOD = 100;   // microseconds
+const float STP_HARD_LIMIT = 360.0;     // Stepper can't go past 1 rotation
 
 // Encoder constants
 const int ENC_STEPS_PER_ROTATION = 1200;
@@ -128,6 +129,12 @@ void move_stepper_by(float deg) {
   
   long int move_by_divs;
 
+  // Don't go beyond limit
+  if ((STP_HARD_LIMIT != 0) && 
+    (abs(get_stepper_angle() + deg) > STP_HARD_LIMIT)) {
+    return;
+  }
+
   // Calculate number of divisions (round to nearest division)
   move_by_divs = (long int)((((float)(STP_DIVS_PER_STEP * 
     STP_STEPS_PER_ROTATION) / 360.0) * deg) + 0.5);
@@ -141,13 +148,14 @@ void move_stepper_to(float deg) {
 
   long int move_by_divs;
 
+  // Don't go beyond limit
+  if ((STP_HARD_LIMIT != 0) && (abs(deg) > STP_HARD_LIMIT)) {
+    return;
+  }
+
   // Calculate number of divisions (round to nearest division)
   move_by_divs = (long int)((((float)(STP_DIVS_PER_STEP * 
     STP_STEPS_PER_ROTATION) / 360.0) * deg) + 0.5);
-
-  Serial.print("Moving to: ");
-  Serial.print(move_by_divs);
-  Serial.println();
 
   // Move stepper
   stepper.moveTo(move_by_divs);
@@ -236,7 +244,9 @@ void loop() {
 
     // If blocking is set, wait for stepper to finish moving
     if (blocking) {
-      while (stepper.isRunning());
+      while (stepper.isRunning()) {
+        stepper.run();
+      }
     }
 
     // Determine motor status

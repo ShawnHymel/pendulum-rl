@@ -25,64 +25,64 @@ STEP_MODE_16 = 4        # 16 divisions per step
 STATUS_OK = 0           # Stepper idle
 STATUS_STP_MOVING = 1   # Stepper is currently moving
 
-# # Connect to Arduino board
-# controller = ControlComms(timeout=CTRL_TIMEOUT, debug_level=DEBUG_LEVEL)
-# ret = controller.connect(SERIAL_PORT, BAUD_RATE)
-# if ret is not StatusCode.OK:
-#     print("ERROR: Could not connect to board")
+# Connect to Arduino board
+controller = ControlComms(timeout=CTRL_TIMEOUT, debug_level=DEBUG_LEVEL)
+ret = controller.connect(SERIAL_PORT, BAUD_RATE)
+if ret is not StatusCode.OK:
+    print("ERROR: Could not connect to board")
     
-# # Comms stress test
-# counter = 0
-# for i in range(100000):
-#     resp = controller.step(CMD_MOVE_BY, [counter])
-#     print(resp)
-#     counter += 1
-#     if counter > 100:
-#         counter = 0
-#     time.sleep(0.001)
+# Comms stress test
+counter = 0
+for i in range(100000):
+    resp = controller.step(CMD_MOVE_BY, [counter])
+    print(resp)
+    counter += 1
+    if counter > 100:
+        counter = 0
+    time.sleep(0.001)
 
 
-ser = serial.Serial(dsrdtr=False)
-ser.rts = False
-ser.dtr = False
+# ser = serial.Serial(dsrdtr=False)
+# ser.rts = False
+# ser.dtr = False
 
-# ser.writeTimeout = 0
-ser.timeout = CTRL_TIMEOUT
-ser.port = SERIAL_PORT
-ser.baudrate = BAUD_RATE
+# # ser.writeTimeout = 0
+# ser.timeout = CTRL_TIMEOUT
+# ser.port = SERIAL_PORT
+# ser.baudrate = BAUD_RATE
 
-ser.open()
+# ser.open()
 
-# TEST
-print("---SERIAL TEST---")
-while True:
+# # TEST
+# print("---SERIAL TEST---")
+# while True:
 
-    # Transmit
-    msg = '{"command": 2, "action": [90]}\n'
-    print(f"TX: {msg}")
-    ser.write(bytes(msg, encoding='utf-8'))
+#     # Transmit
+#     msg = '{"command": 2, "action": [90]}\n'
+#     print(f"TX: {msg}")
+#     ser.write(bytes(msg, encoding='utf-8'))
 
-    # Wait for a response
-    msg = ""
-    try:
+#     # Wait for a response
+#     msg = ""
+#     try:
         
-        # Test my own implementation
-        timestamp = time.time()
-        while time.time() - timestamp < CTRL_TIMEOUT:
-            print(f"{ser.in_waiting} ", end='')
-            c = ser.read(1).decode('ascii')
-            print(c, end='')
-            if c == '\n':
-                break
-            msg += c
+#         # Test my own implementation
+#         timestamp = time.time()
+#         while time.time() - timestamp < CTRL_TIMEOUT:
+#             print(f"{ser.in_waiting} ", end='')
+#             c = ser.read(1).decode('ascii')
+#             print(c, end='')
+#             if c == '\n':
+#                 break
+#             msg += c
 
-        if time.time() - timestamp >= CTRL_TIMEOUT:
-            print()
-            print(f"---TIMEOUT---")
-            print()
+#         if time.time() - timestamp >= CTRL_TIMEOUT:
+#             print()
+#             print(f"---TIMEOUT---")
+#             print()
         
-    except Exception as e:
-        if self.debug_level >= DEBUG_LEVEL:
-            print(f"Error receiving message: {e}")
+#     except Exception as e:
+#         if self.debug_level >= DEBUG_LEVEL:
+#             print(f"Error receiving message: {e}")
 
-    print(f"RX: {msg}")
+#     print(f"RX: {msg}")

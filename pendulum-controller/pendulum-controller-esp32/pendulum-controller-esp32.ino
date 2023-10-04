@@ -42,7 +42,7 @@ const uint16_t ENC_A_PIN = D9;     // Green wire
 const uint16_t ENC_B_PIN = D10;     // White wire
 
 // Communication constants
-static const unsigned int BAUD_RATE = 500000;
+static const unsigned int BAUD_RATE = 1000000;
 static const ControlComms::DebugLevel CTRL_DEBUG = ControlComms::DEBUG_ERROR;
 static constexpr size_t NUM_ACTIONS = 1;
 static constexpr size_t NUM_OBS = 2;
@@ -56,8 +56,8 @@ static const unsigned int CMD_SET_BLOCK_MODE = 4;
 static const unsigned int CMD_NOP = 5;
 
 // Stepper constants
-const uint32_t STP_MAX_SPEED = 6000;
-const uint32_t STP_ACCELERATION = 3000;
+const uint32_t STP_MAX_SPEED = 5000;
+const uint32_t STP_ACCELERATION = 20000;
 const uint16_t STP_DIVS_PER_STEP = 8;
 const uint16_t STP_STEPS_PER_ROTATION = 200;
 const uint8_t STP_DRIVER_TYPE = 1;

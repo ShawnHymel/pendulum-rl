@@ -58,7 +58,7 @@ static const unsigned int CMD_MOVE_HOME = 6;
 
 // Stepper constants
 const uint32_t STP_MAX_SPEED = 1000;
-const uint32_t STP_ACCELERATION = 10000;
+const uint32_t STP_ACCELERATION = 5000;
 const uint16_t STP_DIVS_PER_STEP = 2;
 const uint16_t STP_STEPS_PER_ROTATION = 200;
 const uint8_t STP_DRIVER_TYPE = 1;

@@ -33,6 +33,9 @@
  * Constants and globals
  */
 
+// Model constants
+const float STP_ACTIONS_MAP = [-10, 0, 10];
+
 // Pin definitions
 const int LED_PIN = LED_BUILTIN;
 const uint16_t STP_EN_PIN = D0;
@@ -190,6 +193,7 @@ void setup() {
     ENC_B_PIN, 
     RotaryEncoder::LatchMode::TWO03
   );
+  encoder->setPosition(0);
 
   // Configure encoder interrupts
   attachInterrupt(digitalPinToInterrupt(ENC_A_PIN), encoderISR, CHANGE);

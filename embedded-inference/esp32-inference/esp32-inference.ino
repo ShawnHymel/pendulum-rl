@@ -41,7 +41,7 @@
 
 // Note: Serial calls without a connection causes delays
 // See: https://github.com/espressif/arduino-esp32/issues/6983
-#define DEBUG 0
+#define DEBUG 1
 
 // Actions map
 static const float STP_ACTIONS_MAP[] = {-10, 0, 10};
@@ -57,7 +57,7 @@ static const uint16_t ENC_B_PIN = D10;     // White wire
 // Communication and demo constants
 static const unsigned int BAUD_RATE = 115200;
 static const unsigned int TERMINATE_DELAY = 2000;
-static const unsigned int RESET_DELAY = 5000;
+static const unsigned int RESET_DELAY = 20000;      // 20 sec to let the pendulum fully settle
 static const unsigned long EP_TIMEOUT = 30000;      // ms
 
 // Stepper constants
@@ -257,6 +257,7 @@ void loop() {
   EI_IMPULSE_ERROR resp;
   float max_action_logit;
   uint16_t action_idx = 0;
+  static bool first_ep = true;
   
   // Move home
   stepper.setMaxSpeed(STP_HOME_SPEED);
@@ -268,13 +269,26 @@ void loop() {
   stepper.setMaxSpeed(STP_MAX_SPEED);
   stepper.setAcceleration(STP_ACCELERATION);
 
+  // Wait for pendulum to settle
+  if (first_ep) {
+    delay(1.0);
+    first_ep = false;
+  } else {
+    delay(RESET_DELAY);
+  }
+
+  // There also seems to be a weird bug where the encoder will lose
+  // its absolute position after a few episodes, so we will let the
+  // pendulum fully settle and then reset the encoder "home"
+  encoder->setPosition(0);
+
   // Get initial observation
   enc_angle_prev = get_encoder_angle();
   stp_angle_prev = get_stepper_angle();
   timestamp = millis();
 
-  // Wait for pendulum to settle
-  delay(RESET_DELAY);
+  // Prevent divide by zero
+  delay(10);
 
   // Perform episode
 #if DEBUG

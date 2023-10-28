@@ -54,15 +54,18 @@ static const unsigned int CMD_MOVE_BY = 2;
 static const unsigned int CMD_SET_STEP_MODE = 3;
 static const unsigned int CMD_SET_BLOCK_MODE = 4;
 static const unsigned int CMD_NOP = 5;
+static const unsigned int CMD_MOVE_HOME = 6;
 
 // Stepper constants
-const uint32_t STP_MAX_SPEED = 3000;
-const uint32_t STP_ACCELERATION = 10000;
+const uint32_t STP_MAX_SPEED = 1000;
+const uint32_t STP_ACCELERATION = 5000;
 const uint16_t STP_DIVS_PER_STEP = 2;
 const uint16_t STP_STEPS_PER_ROTATION = 200;
 const uint8_t STP_DRIVER_TYPE = 1;
 const uint32_t STP_TICK_PERIOD = 100;   // microseconds
 const float STP_HARD_LIMIT = 360.0;     // Stepper can't go past 1 rotation
+const uint32_t STP_HOME_SPEED = 500;
+const uint32_t STP_HOME_ACCELERATION = 300;
 
 // Encoder constants
 const int ENC_STEPS_PER_ROTATION = 1200;
@@ -187,6 +190,7 @@ void setup() {
     ENC_B_PIN, 
     RotaryEncoder::LatchMode::TWO03
   );
+  encoder->setPosition(0);
 
   // Configure encoder interrupts
   attachInterrupt(digitalPinToInterrupt(ENC_A_PIN), encoderISR, CHANGE);
@@ -232,15 +236,21 @@ void loop() {
         } else {
           blocking = true;
         }
+        break;
       case CMD_NOP:
         break;
+      case CMD_MOVE_HOME:
+        stepper.setMaxSpeed(STP_HOME_SPEED);
+        stepper.setAcceleration(STP_HOME_ACCELERATION);
+        move_stepper_to(0.0);
+        while (stepper.isRunning()) {
+          stepper.run();
+        }
+        stepper.setMaxSpeed(STP_MAX_SPEED);
+        stepper.setAcceleration(STP_ACCELERATION);
       default:
         break;
     }
-
-    // Read encoder and stepper angles (in degrees)
-    observation[0] = get_encoder_angle();
-    observation[1] = get_stepper_angle();
 
     // If blocking is set, wait for stepper to finish moving
     if (blocking) {
@@ -248,6 +258,10 @@ void loop() {
         stepper.run();
       }
     }
+
+    // Read encoder and stepper angles (in degrees)
+    observation[0] = get_encoder_angle();
+    observation[1] = get_stepper_angle();
 
     // Determine motor status
     if (stepper.isRunning()) {

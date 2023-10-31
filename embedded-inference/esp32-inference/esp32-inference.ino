@@ -41,7 +41,7 @@
 
 // Note: Serial calls without a connection causes delays
 // See: https://github.com/espressif/arduino-esp32/issues/6983
-#define DEBUG 1
+#define DEBUG 0
 
 // Actions map
 static const float STP_ACTIONS_MAP[] = {-10, 0, 10};
@@ -248,6 +248,7 @@ void loop() {
   unsigned long timestamp_ep_start;
   unsigned long timestamp_inference_start;
   unsigned long timestamp_inference_end;
+  float itime;
   float dtime;
   float dtheta;
   float dphi;
@@ -334,7 +335,6 @@ void loop() {
     }
     Serial.print("dtime: ");
     Serial.print(dtime, 3);
-    Serial.println();
 #endif
 
     // Do inference (provide observation, get action logits)
@@ -362,6 +362,15 @@ void loop() {
     while (stepper.isRunning()) {
       stepper.run();
     }
+
+#if DEBUG
+    Serial.print(", infer time: ");
+    itime = (float)(timestamp_inference_end - timestamp_inference_start) / 1000.0;
+    Serial.print(itime, 3);
+    Serial.print(", action: ");
+    Serial.print(STP_ACTIONS_MAP[action_idx]);
+    Serial.println();
+#endif
 
     // Make sure stepper is in bounds
     if ((stp_angle >= STP_ANGLE_MIN) && 

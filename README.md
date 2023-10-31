@@ -2,10 +2,11 @@
 
 This repo demonstrates training a reinforcement learning (RL) agent on a real, hardware inverted pendulum kit: [STEVAL-EDUKIT01](https://www.digikey.com/en/products/detail/stmicroelectronics/STEVAL-EDUKIT01/11696333). 
 
- 1. Load the *pendulum-controller/pendulum-controller-esp32* firmware onto the ESP32 to act as an interface for the Python script
- 2. Run through the cells in *pendulum-rl.ipynb* to perform hyperparameter optimization, agent training, and model extraction
- 3. Convert .onnx model to Arduino library using e.g. Edge Impulse
- 4. Load *embedded-inference/esp32-inference.ino* onto the ESP32 to have the agent run locally on the microcontroller
+ 1. Load the *pendulum-controller/pendulum-controller-esp32* firmware onto the ESP32 to act as an interface for the Python script.
+ 2. Run through the cells in *pendulum-rl.ipynb* to perform hyperparameter optimization, agent training, and model extraction.
+ 3. Convert .onnx model to Arduino library using e.g. Edge Impulse. The public Edge Impulse project can be found [here](https://studio.edgeimpulse.com/public/291849/latest).
+ 4. Install *embedded-inference/esp32-inference/ei-pendulum-rl-conversion-arduino-1.0.2.zip* library in Arduino.
+ 5. Load *embedded-inference/esp32-inference/esp32-inference.ino* onto the ESP32 to have the agent run locally on the microcontroller.
 
 ## License
 
